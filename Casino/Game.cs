@@ -1,26 +1,79 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WMPLib;
 
-namespace Casino
+namespace CasinoGame
 {
-   
+
     public class Game
     {
         private Player player;
         private Bot bot;
+
 
         public Game(Player player, Bot bot)
         {
             this.player = player;
             this.bot = bot;
         }
-
-        private bool CheckManey(int money)
+        private void Music()
         {
-            if (money <= 0)
+            WMPLib.WindowsMediaPlayer w = new WMPLib.WindowsMediaPlayer();
+            w.URL = @"C:\Users\User\Downloads\Deep_House_Elements-Low_Pression_Of_Wot_-_Jack_Of_Jazz_Mix-spcs.me.mp3";
+            w.controls.play();
+        }
+        public int Init(int number)
+        {
+
+            bool b = false;
+            while (!b)
+            {
+
+                string str = Console.ReadLine();
+                while (string.IsNullOrWhiteSpace(str)||str.Length>10)
+                {
+                    Console.Write("Invalid  input . . .  Try Again: \a");
+                    str = Console.ReadLine();
+
+                }
+
+                List<char> list = new List<char>();
+                list.AddRange(str);
+            
+                int temp = 0;
+
+                foreach (var item in list)
+                {
+                    if (char.IsDigit(item))
+                        temp++;
+                    else
+                        temp--;
+                }
+                if (temp == str.Length)
+                {
+                    b = true;
+
+                    number = Convert.ToInt32(str);
+                  
+
+                }
+                else
+
+                    Console.Write("Invalid  input . . .  Try again: \a");
+
+            }
+            return number;
+
+        }
+
+        private bool CheckManey(double money)
+        {
+
+
+            if (money <= 0 )
             {
                 return false;
             }
@@ -29,7 +82,9 @@ namespace Casino
 
         private bool CompareBetAndMoney(Player player)
         {
-            player.Bet = int.Parse(Console.ReadLine());
+
+            player.Bet = Init(number);
+
             if (player.Bet > player.Money || player.Bet <= 0)
             {
                 return false;
@@ -37,9 +92,12 @@ namespace Casino
             return true;
         }
 
-        private bool CheckNumber(out int number)
+        int number;
+        private bool CheckNumber()
         {
-            number = int.Parse(Console.ReadLine());
+            number = Init(number);
+
+
             if (number >= 1 && number <= 6)
             {
                 return true;
@@ -69,33 +127,44 @@ namespace Casino
 
             while (b)
             {
+
+
                 while (!CheckManey(player.Money))
                 {
-                    Console.WriteLine("Unsighit Money");
+
+                    Console.Write("Invalid  input . . .  Try again: \a ");
                     player.Money = int.Parse(Console.ReadLine());
                 }
 
-                Console.Write("Enter Bet: ");
+                Console.Write("Enter bet: ");
 
                 while (!CompareBetAndMoney(player))
                 {
 
-                    Console.WriteLine("Unsighit Bet Number");
+                    Console.Write("Invalid  input . . .  Try again: \a");
                 }
 
-                Console.Write("Enter Number: ");
+                Console.Write("Enter number: ");
 
-                int num;
 
-                while (!CheckNumber(out num))
+                while (!CheckNumber())
                 {
-                    Console.WriteLine("Input Number 1-6");
+                    Console.Write("Enter number between 1 and 6: ");
                 }
 
                 bot.RandomInt = GenerateRandomInt();
 
-                Finish(CheckOfWinning(bot.RandomInt, num));
+                Finish(CheckOfWinning(bot.RandomInt, number));
+
+                if (!CheckManey(player.Money))
+                {
+                    Console.WriteLine($"You have 0$.\nThanks {player.Name} for the game. ");
+                    return;
+
+                }
+
             }
+
 
 
         }
@@ -104,46 +173,66 @@ namespace Casino
         {
             if (flag)
             {
-                Console.WriteLine($"You Are Win {player.Name}");
-                player.Money += player.Bet * 6;
+                Console.WriteLine($"You won {player.Name}");
+                player.Money += player.Bet * 4;
             }
             else
             {
-                Console.WriteLine("You Are Lose " + player.Name);
+                Console.WriteLine($"You lost {player.Name}");
                 player.Money -= player.Bet;
+
             }
-
-
-            Console.WriteLine("Your Score = " + player.Money);
-            Console.WriteLine("Continue Game?");
-
-            while (true)
+            Console.WriteLine($"The number is {bot.RandomInt}");
+            if (player.Money > 0)
             {
+                Console.WriteLine($"You have {player.Money}$");
+
+            }
+            Console.Write("Continue game?: ");
+
+            while (b)
+            {
+
                 string Revansh = Console.ReadLine();
                 if (Revansh.ToLower() == "yes")
                 {
                     b = true;
+                    Console.Clear();
                     return;
                 }
+
                 if (Revansh.ToLower() == "no")
                 {
-                    Console.WriteLine($"Thanks {player.Name} For The Game");
-                    b = false;
-                    return;
+                    if (player.Money != 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"Thanks {player.Name} for the game");
+                        b = false;
+                        return;
+                    }
+                    else
+                    {
+                        b = false;
+                        return;
+                    }
                 }
+
                 else
                 {
-                    Console.WriteLine("Input Yes Or No");
+                    Console.Write("Type Yes or No: ");
                 }
             }
         }
         public void CheckName()
         {
-            Console.Write("Enter Your Name: ");
+            Music();
+
+            Console.Write("Enter your name: ");
             player.Name = Console.ReadLine();
+
             while (string.IsNullOrWhiteSpace(player.Name))
             {
-                Console.Write("Invalid  Input . . .  Try Again: ");
+                Console.Write("Invalid  input . . .  Try again: \a");
                 player.Name = Console.ReadLine();
             }
         }
